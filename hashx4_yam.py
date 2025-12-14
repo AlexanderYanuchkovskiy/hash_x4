@@ -23,6 +23,7 @@ metrics_thread = threading.Thread(target=update_metrics, daemon=True)
 metrics_thread.start()
 
 start_http_server(8080)
+print('ssus')
 from time import perf_counter_ns, process_time_ns
 from os import getpid
 

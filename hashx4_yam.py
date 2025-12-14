@@ -1,3 +1,28 @@
+from prometheus_client import start_http_server, Gauge, Counter
+import threading
+import time
+import random
+
+disk_usage = Gauge('hashx4_disk_usage_bytes', 'Disk usage')
+cpu_usage = Gauge('hashx4_cpu_usage_percent', 'CPU usage')
+memory_usage = Gauge('hashx4_memory_usage_bytes', 'Memory usage')
+health_status = Gauge('hashx4_health_status', 'Health status')
+hash_rate = Gauge('hashx4_hash_rate_second', 'Hash rate')
+
+def update_metrics():
+    while True:
+        # Обновляйте метрики
+        disk_usage.set(get_disk_usage())
+        cpu_usage.set(get_cpu_usage())
+        memory_usage.set(get_memory_usage())
+        health_status.set(1)  # Если приложение работает
+        hash_rate.set(calculate_hash_rate())
+        time.sleep(5)
+
+metrics_thread = threading.Thread(target=update_metrics, daemon=True)
+metrics_thread.start()
+
+start_http_server(8080)
 from time import perf_counter_ns, process_time_ns
 from os import getpid
 

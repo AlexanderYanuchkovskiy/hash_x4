@@ -1,29 +1,3 @@
-from prometheus_client import start_http_server, Gauge, Counter
-import threading
-import time
-import random
-
-disk_usage = Gauge('hashx4_disk_usage_bytes', 'Disk usage')
-cpu_usage = Gauge('hashx4_cpu_usage_percent', 'CPU usage')
-memory_usage = Gauge('hashx4_memory_usage_bytes', 'Memory usage')
-health_status = Gauge('hashx4_health_status', 'Health status')
-hash_rate = Gauge('hashx4_hash_rate_second', 'Hash rate')
-
-def update_metrics():
-    while True:
-        # Обновляйте метрики
-        disk_usage.set(get_disk_usage())
-        cpu_usage.set(get_cpu_usage())
-        memory_usage.set(get_memory_usage())
-        health_status.set(1)  # Если приложение работает
-        hash_rate.set(calculate_hash_rate())
-        time.sleep(5)
-
-metrics_thread = threading.Thread(target=update_metrics, daemon=True)
-metrics_thread.start()
-
-start_http_server(8080)
-print('ssus')
 from time import perf_counter_ns, process_time_ns
 from os import getpid
 
@@ -204,32 +178,25 @@ def random(n: int):
 
     return a
 
-print('''
-Available actions:
 
-1. Hash the password (standard 128-bit size)
-2. Hash the password with the hash size (in bits)
-3. Generate n random bytes (from 0 to 255)
-4. Generate a random number in the range [a, b]''')
+from time import sleep
 
+pid = getpid()
+with open('mempool.txt', 'w') as file:
+	file.write(str(pid)+'\n')
+l = []
 while True:
-    inp = input('do >> ')
-    if inp=='1':
-        passwd = input('passwd >> ')
-        print('hash password', hex(hash_x4(passwd)))
-    elif inp=='2':
-        passwd = input('passwd >> ')
-        size = int(input('size of bit >> '))
-        print(f'{size}-bit hash password', hex(hash_x4(passwd, size)))
-    elif inp=='3':
-        n = int(input('n >> '))
-        r = random(n)
-        for i in range(n):
-            r[i] = hex(r[i])
-        print(f'{n} random bytes', *r)
-    elif inp=='4':
-        a = int(input('a >> '))
-        b = int(input('b >> '))
-        print('random number', randint(a, b))
-    else:
-        print('There is no such action')
+	d = random(6)
+	b = bytes(d)
+	b = int.from_bytes(b, 'big')
+	h = hex(get_rand64(b))
+	print(h)
+	l += [h]
+	if len(l) > 512:
+		with open('mempool.txt', 'a') as file:
+			for el in l:
+				file.write(el+'\n')
+
+		l = []
+	t = randint(10, 100)
+	sleep(t/1000)
